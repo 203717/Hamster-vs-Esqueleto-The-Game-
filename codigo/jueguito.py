@@ -3,7 +3,7 @@ import sys
 from player import Player
 from random import choice, randint
 from laser import Laser
-from hamster import Hamster, Mini
+from hamster import Hamster
 import threading
 import obstaculo
 import time
@@ -34,10 +34,6 @@ class Game:
 		self.th4 =threading.Thread(self.hamster_setup(rows = 4, cols = 8))
 		self.th4.start()
 
-		#Minis
-		# mini setup
-		self.mini = pygame.sprite.GroupSingle()
-		self.mini_spawn_time = randint(40,80)
 		#bloques
 		self.shape = obstaculo.shape
 		self.block_size = 6
@@ -77,7 +73,6 @@ class Game:
 				self.hamsters.add(hamster_sprite)
 
 	def hamster_posicion_c(self):
-		#all_hamsters = self.hamsters.sprites()
 		for hamster in self.hamsters.sprites():
 			if hamster.rect.right >= screen_width:
 				self.hamster_direc = -1
@@ -98,13 +93,6 @@ class Game:
 			laser_sprite = Laser(random_hamster.rect.center,6,screen_height)
 			self.hamster_lasers.add(laser_sprite)
 			self.laser_sound.play()
-
-
-	def mini_hamster_timer(self):
-		self.mini_spawn_time -= 1
-		if self.mini_spawn_time <= 0:
-			self.mini.add(Mini(choice(['right','left']),screen_width))
-			self.mini_spawn_time = randint(400,800)
 
 	def create_obstaculo(self, x_start, y_start,offset_x):
 		for row_index, row in enumerate(self.shape):
@@ -136,11 +124,6 @@ class Game:
 					laser.kill()
 					self.explosion_sound.play()
 				
-				# mini collision
-				if pygame.sprite.spritecollide(laser,self.mini,True):
-					self.puntaje += 500
-					laser.kill()
-
 		# hamster lasers 
 		if self.hamster_lasers:
 			for laser in self.hamster_lasers:
@@ -181,7 +164,7 @@ class Game:
 
 	def ganaste_message(self):
 		if not self.hamsters.sprites():
-			ganaste_surf = self.font.render('Ya ganaste Tu!',False,'white')
+			ganaste_surf = self.font.render('Ganaste el burrito uwu!',False,'white')
 			ganaste_rect = ganaste_surf.get_rect(center = (screen_width / 2, screen_height / 2))
 			screen.blit(ganaste_surf,ganaste_rect)
 	
@@ -191,10 +174,8 @@ class Game:
 	def run(self):
 		self.player.update()
 		self.hamster_lasers.update()
-		self.mini.update()
 		self.hamsters.update(self.hamster_direc)
 		self.hamster_posicion_c()
-		self.mini_hamster_timer()
 		self.coliciones_veri()
 		
 
@@ -205,14 +186,14 @@ class Game:
 		self.hamsters.draw(screen)
 		
 		self.hamster_lasers.draw(screen)
-		self.mini.draw(screen)
+
 		self.display_vidas()
 		self.display_puntaje()
 		self.ganaste_message()
 		self.perder()
 	
 
-class CRT:
+class GENERADORTV:
 	def __init__(self):
 		self.tv = pygame.image.load('D:/Downloads/jueguito/grafi/tv.png').convert_alpha()
 		self.tv = pygame.transform.scale(self.tv,(screen_width,screen_height))
@@ -237,14 +218,12 @@ if __name__ == '__main__':
 	screen = pygame.display.set_mode((screen_width,screen_height))
 	clock = pygame.time.Clock()
 	game = Game()
-	crt = CRT()
+	generador = GENERADORTV()
 
 	HAMSTERLASER = pygame.USEREVENT + 1
 	pygame.time.set_timer(HAMSTERLASER,800)
 	
 	while True:
-
-		
 		for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
@@ -254,7 +233,7 @@ if __name__ == '__main__':
 
 		screen.fill((30,30,30))
 		game.run()
-		crt.draw()
+		generador.draw()
 			
 		pygame.display.flip()
 		clock.tick(60)
